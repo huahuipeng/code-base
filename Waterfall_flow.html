@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/template-native.js"></script>
+    <!--
+      我扩展jQuery ，在jQuery 的基础上面添加一个方法.
+    -->
+    <script src="js/waterFall.js"></script>
+    <script type="text/template" id="waterId">
+        <%for(var i=0;i<items.length;i++){%>
+        <div class="item">
+            <img src="<%=items[i].path%>" alt="" width="" height="">
+            <p>
+                <%=items[i].text%>
+            </p>
+        </div>
+        <% } %>
+    </script>
+    <script>
+        /*
+         页面加载完毕，我发送一个请求给后台，php 程序员
+
+         /*
+         1.请求方式  get
+         2.请求url  data.php
+         3.请求传递的参数   page  当前页数  pageSize  每一页多少条数据
+         4.是后台在处理
+         5.返回数据 {page:'下一页的页码',items:[{path:'图片路径',text:'文字'},{},{}...]}
+         *
+         * */
+        $(function(){
+            var params={
+                page:1,
+                pageSize:50
+            };
+
+            var render=function(){
+                $.ajax({
+                    url:"data.php",
+                    data:params,
+                    type:"get",
+                    success:function(data){
+                        var obj=JSON.parse(data);
+
+
+                        if(obj.items.length==0){
+
+                            $(".btn").html("没有加载的数据.");
+                            return;
+                        }
+
+                        params.page=obj.page;
+                        var html=template("waterId",obj);
+                        $(".items").append(html);
+                        $(".items").waterFall();
+                    }
+
+                })
+            }
+            //刚开始页面的数据.
+            render();
+
+            $(".btn").click(function(){
+
+                render();
+            });
+        })
+    </script>
+
+    <style>
+        .container{
+            width: 1200px;
+            margin: 0 auto;
+            padding-top: 40px;
+
+        }
+        .items{
+            position: relative;
+        }
+        .item{
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 232px;
+            box-shadow:0px 0px 10px rgba(0,0,0,0.3);
+        }
+        .item>img{
+            width: 100%;
+            display: block;
+            height: 400px;
+        }
+        .item:nth-child(4n) img{
+            display: block;
+            height: 289px;
+        }
+        .container > .btn {
+            width: 280px;
+            height: 40px;
+            margin: 30px auto;
+            text-align: center;
+            line-height: 40px;
+            background-color: #CCC;
+            border-radius: 6px;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="items">
+
+    </div>
+    <div class="btn loading ">正在加载中...</div>
+</div>
+</body>
+</html>
